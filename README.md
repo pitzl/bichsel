@@ -3,11 +3,11 @@
 
 ## energy loss in silicon
 
-Hans Bichsel: Straggling in thin silicon detectors 
-Rev. Mod. Phys. 60 (1988) 663-99 
+Hans Bichsel: Straggling in thin silicon detectors  
+Rev. Mod. Phys. 60 (1988) 663-99  
 http://prola.aps.org/abstract/RMP/v60/i3/p663_1
 
-The original code was in FORTRAN and may still be found at 
+The original code was in FORTRAN and may still be found at  
 https://www.slac.stanford.edu/~sudong/silicon/
 
 Here, the code is transformed into Fortran 90: bichsel.f90
