@@ -70,7 +70,7 @@ void simscat()
   TGraph * g4 = new TGraph( n, &vlogde[0], &vesig[0] );
   g4->SetTitle( "d#sigma/dlog(#DeltaE)" );
   g4->Draw("ac"); // M-shell dominates
-  
+
   // inversion method for dsigma/dlog(dE) = dE dsigma/ddE
   // equidstant bins in log(dE)
 

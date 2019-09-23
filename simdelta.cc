@@ -160,7 +160,7 @@ int main( int argc, char* argv[] )
   TGraph * g4 = new TGraph( n, &vlogde[0], &vesig[0] );
   g4->SetTitle( "d#sigma/dlog(#DeltaE)" );
   g4->Draw("ac"); // M-shell dominates
-  
+
   // inversion method for dsigma/dlog(dE) = dE dsigma/ddE
   // non-equidstant bins in dE and log(dE)
 

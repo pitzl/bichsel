@@ -6,14 +6,14 @@
 ! Calculates the differential cross section for delta rays in silicon
 ! for incident particles of given mass, charge, and energy
 ! using tbles of dielectric 'constants', Generalised Oscillation Strengths,
-! and 
+! and
 ! Calculates the "Landau" energy loss distribution for a silicon
 ! detector of given thickness by convolution
 
 ! Output:
 ! eesig.dat    differential cross section for delta rays
-! CONV.OPA     Control debugging output 
-! CONV.SPE     Folded E-loss spectrum      
+! CONV.OPA     Control debugging output
+! CONV.SPE     Folded E-loss spectrum
 
 ! gfortran -O2 -o bichsel bichsel.f90
 ! bichsel (prompts for kinetic energy of e)
@@ -108,7 +108,7 @@ subroutine EPRED
   ! HEPS.TAB is the table of the dielectric constant for solid Si,
   ! epsilon = ep(1,j) + i*ep(2,j), as a function of energy loss E(j),
   ! section II.E in RMP, and rim is Im(-1/epsilon), Eq. (2.17), p.668.
-  ! This is used for the cross section of small momentum transfer excitations.    
+  ! This is used for the cross section of small momentum transfer excitations.
 
   implicit none
 
@@ -149,7 +149,7 @@ subroutine AERED
   ! MACOM.TAB is the table of the integrals over momentum transfer K of the
   ! generalized oscillator strength, summed for all shells, i.e. the A(E)
   ! of Eq. (2.11), p. 667 of RMP
-  ! longitudinal excitation ( K+L shells ) with large momentum tansfers.   
+  ! longitudinal excitation ( K+L shells ) with large momentum tansfers.
 
   implicit none
 
@@ -212,12 +212,12 @@ END subroutine EMRED
 !-----------------------------------------------------------------------
 subroutine PREP
 
-  ! Initialization routine for user parameter input & basic constants 
+  ! Initialization routine for user parameter input & basic constants
   ! Particle types NPM:
   ! = 1    proton
   ! = 2    pion
   ! = 3    alpha
-  ! = 4    electron ( positron ) 
+  ! = 4    electron ( positron )
   ! = 5    kaon
 
   implicit none
@@ -261,7 +261,7 @@ subroutine PREP
 
   exth = exth / 1e4
 
-  ! set particle mass values ( MeV ) according to input code number  
+  ! set particle mass values ( MeV ) according to input code number
 
   PTM = PMASS( npm )
 
@@ -270,11 +270,11 @@ subroutine PREP
   zi = 1.0
   if( npm .eq. 3 ) zi = 2.0
 
-  ! properties of absober material ( Silicon ) 
-  ! ZA = atomic number 
+  ! properties of absober material ( Silicon )
+  ! ZA = atomic number
   ! AW = atomic weight
-  ! rho = density  ( g/cm**3 ) 
-  ! atnu = # of atoms/cm**3 
+  ! rho = density  ( g/cm**3 )
+  ! atnu = # of atoms/cm**3
 
   ZA = 14.0
   AW = 28.086
@@ -302,7 +302,7 @@ END subroutine PREP
 !-----------------------------------------------------------------------
 subroutine EVANS
 
-  ! Initialization of kinematic parameters 
+  ! Initialization of kinematic parameters
 
   implicit none
 
@@ -331,8 +331,8 @@ subroutine EVANS
 
   go to( 11, 22, 33 ), jkm
 
-  ! Calculate the following     W = Gamma  ( E_total/mass ) 
-  ! pKe = Particle kinetic energy 
+  ! Calculate the following     W = Gamma  ( E_total/mass )
+  ! pKe = Particle kinetic energy
   ! bg = beta*gamma
 
   !---  input was kinetic energy
@@ -343,21 +343,21 @@ subroutine EVANS
   print *, pkE, "  ", bg
   go to 34
 
-  !--   input was momentum  
+  !--   input was momentum
 
 22 pmom = xxx
   bg = xxx / ptM
   W = sqrt( bg**2 + 1.0 )
   pkE = ptM * ( W - 1.0 )
-  go to 35 
+  go to 35
 
-  !--   input was beta*gamma 
+  !--   input was beta*gamma
 
-33 bg = xxx                
+33 bg = xxx
   W = sqrt( bg**2 + 1.0 )
   pkE = ptM * ( W - 1.0 )
 
-  !     further parameters:  pmom = particle momentum ( MeV )  
+  !     further parameters:  pmom = particle momentum ( MeV )
   !     ptE  = particle total energy ( MeV )
 34 pmom = ptM * bg
 35 betasq = bg**2 / ( 1 + bg**2 )
@@ -365,7 +365,7 @@ subroutine EVANS
   gam  = W
   ! ptE  = ptM * W
 
-  ! Maximum energy transfer   Emax  ( MeV ) 
+  ! Maximum energy transfer   Emax  ( MeV )
   ! Uehling, also Sternheimer & Peierls Eq.( 53 )
 
   telm = 2 * 0.511004
@@ -390,7 +390,7 @@ END subroutine EVANS
 !-----------------------------------------------------------------------
 subroutine PREPE
 
-  ! Definitions of energy scale ( log ) bin size 
+  ! Definitions of energy scale ( log ) bin size
 
   implicit none
 
@@ -415,7 +415,7 @@ subroutine PREPE
   integer ken, l
   real exs
 
-  ! n2 = number of bins for each factor of 2 in energy 
+  ! n2 = number of bins for each factor of 2 in energy
 
   n2   = 64
   nume = 650
@@ -504,7 +504,7 @@ subroutine SPECT
 307 format( /4X, 'SPECT F.307:  beta**2=', F12.10, 4X, '# of', &
          ' atoms per cm**3=', e12.4, 3x, 'blg=', f9.4, / )
   !     write( 3, 308 )
-  !     308    format( 3x, 'j', 5x, 'E/eV', 5x, 'df/dE ', 5x, 'sgg', 6x, 'sgh', 
+  !     308    format( 3x, 'j', 5x, 'E/eV', 5x, 'df/dE ', 5x, 'sgg', 6x, 'sgh',
   !     1  7x, 'S 1', 6x, 'S 3', 6x, 'S 4', 5x, 'sum S', 5x, 'S( 0 )', 3x, 'dE/dx'/ )
 
   jpr = 5
@@ -544,13 +544,13 @@ subroutine SPECT
      Qmin = E( j )**2 / tmcb
      sig( 1, j ) = 0
      if( E( j ) .lt. 11.9 .and. Q1 .le. Qmin ) go to 14
-     sig( 1, j ) = E( j ) * dfdE( j ) * alog( Q1 / Qmin ) 
+     sig( 1, j ) = E( j ) * dfdE( j ) * alog( Q1 / Qmin )
 14   epbe = 1 - betasq * ep( 1, j )
      ! Fano Eq 47
      if( epbe .eq. 0 ) epbe = 1e-20
      sgg = E( j ) * dfdE( j )*( -.5 )*alog( epbe**2+( betasq*ep( 2, j ) )**2 )
      thet = atan( ep( 2, j ) * betasq / epbe )
-     if( thet .lt. 0 ) thet = thet + pi         
+     if( thet .lt. 0 ) thet = thet + pi
      ! plausible-otherwise I'd have a jump
      ! Fano says [p 21]: 'arctan approaches pi for betasq*eps1 > 1'
      sgh = E( j )**2 *( betasq-ep( 1, j ) / ( ep( 1, j )**2+ep( 2, j )**2 ) )*thet
@@ -569,12 +569,12 @@ subroutine SPECT
         sig( 5, j ) = sig( 5, j ) + sig( L, j )
 27   enddo
      Tsig( 5 ) = Tsig( 5 ) + sig( 5, j ) * dE( j ) / E( j )**2
-     STP( 5 )  = STP( 5 )  + sig( 5, j ) * dE( j ) / E( j )  
+     STP( 5 )  = STP( 5 )  + sig( 5, j ) * dE( j ) / E( j )
      rM2( 5 )  = rM2( 5 )  + sig( 5, j ) * dE( j )
      !     if( j .eq. 1 ) go to 28
      !     if( j .ge. 320 .and. j .le. 326 ) go to 28
      !     if( ( j/10 )*10 .ne. j ) go to 5
-     !     28     write( 3, 608 ) j, E( j ), dfdE( j ), sgg, sgh, sig( 1, j ), ( sig( L, j ), L=3, 5 ), 
+     !     28     write( 3, 608 ) j, E( j ), dfdE( j ), sgg, sgh, sig( 1, j ), ( sig( L, j ), L=3, 5 ),
      !     1          S0, STP( 5 )
      !     608            format( 1x, i4, f9.1, 1pe11.3, 0p9f9.4 )
 
@@ -638,7 +638,7 @@ subroutine SPTS
   integer jpr, ja, j, nlast
 
   !     write( 3, 333 )
-  !333  format( /4X, 'SPTS, F.333:', /15X, 'E', 7x, 'sig*E**2', 6x, 'sig', 
+  !333  format( /4X, 'SPTS, F.333:', /15X, 'E', 7x, 'sig*E**2', 6x, 'sig',
   !     1       10X, 'M 0', 11X, 'M 1', 11X, 'M 2', 10X, '<E>', / )
   SGM  = 0
   Stpw = 0
@@ -773,7 +773,7 @@ subroutine CONV
   real pb, dmmpl
   integer n
 
-  ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+  ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   write( 3, 303 )
 303 format( /1x, 50(' *'))
@@ -801,8 +801,8 @@ subroutine CONV
   CM1 = 1.0
   CM2 = 1.0
   XN  = 1.0
-  EX  = 1.e-15              
-  MIE = 0                 
+  EX  = 1.e-15
+  MIE = 0
   MIF = 0
   MIH = 0
 
@@ -874,7 +874,7 @@ subroutine CONV
      ! write( 3, 408) N1, leh, CN, xi, rkap, PB, PZERO   ! PZERO undefined ?
      ! 408            format( ' CONV,  F.408', 2i5, f9.3, 1p4e11.4/)
 
-     write( 3, 408) N1, leh, CN, xi, rkap, PB 
+     write( 3, 408) N1, leh, CN, xi, rkap, PB
 408  format( ' CONV,  F.408', 2i5, f9.3, 1p3e11.4/)
 
      call OUTPUT
@@ -884,7 +884,7 @@ subroutine CONV
 END subroutine CONV
 
 !-------------------------------------------------------------------------------
-subroutine OUTPUT               
+subroutine OUTPUT
 
   implicit none
 
@@ -917,7 +917,7 @@ subroutine OUTPUT
   real bax, dmp, bax1, dmp1, hhun
   integer npp, nskip, j2, l2, llow, lup, lmax
 
-  ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+  ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   B = CM2 / (CM1**2)
   C = CM3 / sqrt(CM2**3)
@@ -1064,7 +1064,7 @@ subroutine FOLD
 END subroutine FOLD
 
 !-------------------------------------------------------------------------------
-subroutine RESET                
+subroutine RESET
 
   implicit none
 
@@ -1091,13 +1091,13 @@ subroutine RESET
 375 format( 1x, 'RESET: ', 2i4, '  Coordinate change: doubling of ',  &
          'point grid', i4, ' points on a factor of 2', /)
   write( 3, *) ' LEH, MIH, MIE=', LEH, MIH, MIE
-  do LL = 1, LEF                  
+  do LL = 1, LEF
      ! this is from top down
      L = LEF + 1 - LL
      F(2*L) = F(L)
   enddo
   N = 2*LEF
-  do L = 4, N, 2                   
+  do L = 4, N, 2
      ! N is just some number
      F(L-1) = (F(L) + F(L-2)) / 2.
   enddo
@@ -1112,7 +1112,7 @@ subroutine RESET
      DI(J) = - log(1. - exp(-S*U)) / U
   enddo
 
-702 MIE = MIF                       
+702 MIE = MIF
 
   do J = 1, leh
      S     = float(J+MIE)
@@ -1150,7 +1150,7 @@ subroutine ZERO
      K = L+N
      xs = xs + H(L)*DE(K)
   enddo
-  xs = ( 1.0 - F0 )**2 / xs 
+  xs = ( 1.0 - F0 )**2 / xs
   write( 3, *) k, xs, H(l), dE(K)
   do  L = 1, leh
      H(L) = H(L) * xs
