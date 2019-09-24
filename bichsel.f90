@@ -420,10 +420,10 @@ subroutine PREPE
   n2   = 64
   nume = 650
   if( n2 .eq. 64 ) nume = 1250
-  u    = log( 2. ) / n2
+  u    = log( 2.0 ) / n2
   um   = exp( u )
-  ken  = log( 1839. / 1.5 ) / u
-  Emin = 1839. / 2**( 1.0*ken/n2 )
+  ken  = log( 1839.0 / 1.5 ) / u
+  Emin = 1839.0 / 2**( ken/n2 ) ! integer division ken/N2 intended
   E( 1 ) = Emin
   EXS = 1.
 
@@ -435,7 +435,7 @@ subroutine PREPE
   lemx = nume + 450
   do L = 1, lemx
      EXS = EXS * um
-     E( L+1 ) = E( L ) * um
+     E( L+1 ) = E( L ) * um ! must agree with heps.tab
      if( ( L/50 )*50 .eq. L ) print*, ' L, E=', L, E( L ), exs, um
      DI( L )  = -alog( 1.0 - 1.0/EXS ) / u
      DE( L )  = E( L+1 ) - E( L )
@@ -495,8 +495,8 @@ subroutine SPECT
   real tmcb, uef, q1, qmin, epbe, thet, sgh, rmf, sgg
   integer jpr, jpd, l, j
 
-  elm = 511004.
-  fac = 8. * pi * Ry**2 * ( 0.529177e-8 )**2 / ( elm * betasq )
+  elm = 511004.0
+  fac = 8.0 * pi * Ry**2 * ( 0.529177e-8 )**2 / ( elm * betasq )
   DEC = zi**2 * atnu * fac
 
   blg = alog( ( 2.*elm ) * bg**2 ) - betasq
@@ -525,6 +525,7 @@ subroutine SPECT
   do 5 j = 1, nume
 
      if( E( j ) .gt. Emax ) go to 11
+
      if( npm .eq. 4 ) then
         uef = 1 + ( E( j )/( pf-E( j ) ) )**2 + ( ( ( gam-1 ) / gam ) &
              * E( j )/pf )**2 - ( 2*gam - 1 )*E( j )/( gam**2 * ( pf - E( j ) ) )
@@ -533,33 +534,42 @@ subroutine SPECT
      endif
      ! uef from Uehling Eqs. 9 & 2
      if( j .eq. 1 ) print*, ' uef=', uef
+
      S0   = S0   + dfdE( j ) * dE( j )
      avI  = avI  + dfdE( j ) * alog( E( j ) ) * dE( j )
      avI1 = avI1 + dfdE( j ) * E( j ) * alog( E( j ) ) * dE( j )
      S1   = S1   + dfdE( j ) * E( j ) * dE( j )
+
      Q1 = Ry
      !ee   red CCS-33, 39 & 47
-     if( E( j ) .lt. 100. )  Q1 = 0.025**2 * Ry
+     if( E( j ) .lt. 100. ) Q1 = 0.025**2 * Ry
      if( E( j ) .lt. 11.9 ) Q1 = xkmn( j )**2 * Ry
+
      Qmin = E( j )**2 / tmcb
+
      sig( 1, j ) = 0
      if( E( j ) .lt. 11.9 .and. Q1 .le. Qmin ) go to 14
      sig( 1, j ) = E( j ) * dfdE( j ) * alog( Q1 / Qmin )
-14   epbe = 1 - betasq * ep( 1, j )
-     ! Fano Eq 47
+
+14   epbe = 1 - betasq * ep( 1, j )! Fano Eq 47
      if( epbe .eq. 0 ) epbe = 1e-20
-     sgg = E( j ) * dfdE( j )*( -.5 )*alog( epbe**2+( betasq*ep( 2, j ) )**2 )
+
+     sgg = E( j ) * dfdE( j )*( -.5 )*alog( epbe**2 + ( betasq*ep( 2, j ) )**2 )
+
      thet = atan( ep( 2, j ) * betasq / epbe )
      if( thet .lt. 0 ) thet = thet + pi
      ! plausible-otherwise I'd have a jump
      ! Fano says [p 21]: 'arctan approaches pi for betasq*eps1 > 1'
-     sgh = E( j )**2 *( betasq-ep( 1, j ) / ( ep( 1, j )**2+ep( 2, j )**2 ) )*thet
+
+     sgh = E( j )**2 *( betasq - ep( 1, j ) / ( ep( 1, j )**2 + ep( 2, j )**2 ) )*thet
      sgh = 0.0092456 * sgh
      sig( 3, j ) = sgg + sgh
+
      sig( 4, j ) = 2. * sig( 6, j ) * uef
      ! the integral was over  d lnK rather than  d lnQ
      !     if( ( j/10 )*10 .eq. j ) print 327, E( j ), sgg, sgh, ( sig( ii, j ), ii=1, 4 )
      !     327            format( 1x, f11.2, 1p6e11.3 )
+
      sig( 2, j ) = 0
      sig( 5, j ) = 0
      do  27 L=1, 4
@@ -571,12 +581,9 @@ subroutine SPECT
      Tsig( 5 ) = Tsig( 5 ) + sig( 5, j ) * dE( j ) / E( j )**2
      STP( 5 )  = STP( 5 )  + sig( 5, j ) * dE( j ) / E( j )
      rM2( 5 )  = rM2( 5 )  + sig( 5, j ) * dE( j )
-     !     if( j .eq. 1 ) go to 28
-     !     if( j .ge. 320 .and. j .le. 326 ) go to 28
-     !     if( ( j/10 )*10 .ne. j ) go to 5
-     !     28     write( 3, 608 ) j, E( j ), dfdE( j ), sgg, sgh, sig( 1, j ), ( sig( L, j ), L=3, 5 ),
-     !     1          S0, STP( 5 )
-     !     608            format( 1x, i4, f9.1, 1pe11.3, 0p9f9.4 )
+
+     write( 3, 608 ) j, E( j ), dfdE( j ), sgg, sgh, sig( 1, j ), ( sig( L, j ), L=3, 5 )
+608  format( 1x, i4, f9.1, 1p, e11.3, 0p, 6f9.4 )
 
 5 enddo
 

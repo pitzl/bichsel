@@ -63,6 +63,8 @@ int main( int argc, char* argv[] )
 
   } // argc
 
+  cout << endl << "thickness " << thck << " um" << endl << endl;
+
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   cout << "try to open eesig-e5000.dat";
@@ -160,7 +162,7 @@ int main( int argc, char* argv[] )
   TGraph * g4 = new TGraph( n, &vlogde[0], &vesig[0] );
   g4->SetTitle( "d#sigma/dlog(#DeltaE)" );
   g4->Draw("ac"); // M-shell dominates
-
+  
   // inversion method for dsigma/dlog(dE) = dE dsigma/ddE
   // non-equidstant bins in dE and log(dE)
 
@@ -197,8 +199,8 @@ int main( int argc, char* argv[] )
 
   TFile * hFile = new TFile( "simdelta.root", "RECREATE" );
 
-  TH1I honede( "onede", "single E loss;log_{10}(single energy loss [eV]);scatters",
-	       120, 0, 6 );
+  TH1I hlogde( "logde", "single E loss;log_{10}(single energy loss [eV]);scatters",
+	       160, 0, 8 );
 
   TH1I hrng( "range", "delta ray range;log_{10}(delta ray range [um]);rays", 80, 0, 4 );
 
@@ -233,7 +235,7 @@ int main( int argc, char* argv[] )
 
   TRandom1 * myRandom = new TRandom1(); // 1 = Ranlux
 
-  bool Fill = 0; // 37% faster
+  bool Fill = 1; // 37% faster
 
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -276,7 +278,7 @@ int main( int argc, char* argv[] )
       }
 
       if( Fill )
-	honede.Fill( log(de)/log10 );
+	hlogde.Fill( log(de)/log10 );
 
       sumde += de;
 
