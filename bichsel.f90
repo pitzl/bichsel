@@ -42,9 +42,9 @@ program LOSS
   real Emin, Efin, Emax, gam, pkE
   common / ENER / Emin, Efin, Emax, gam, pkE
 
-  real saxk, Etop, bemx, FSG, zi, su(8)
+  real saxk, bemx, FSG, zi, su(8)
   integer nels(2)
-  common / NML / saxk, Etop, bemx, FSG, zi, su, nels
+  common / NML / saxk, bemx, FSG, zi, su, nels
 
   real sig(6, 1252), stp(5), tsig(5), rM2(5), rim(1252)
   common / SPTT / sig, stp, tsig, rM2, rim
@@ -229,9 +229,9 @@ subroutine PREP
   real ptM, bg, betasq
   common / EVA / npm, nzch, ptM, bg, betasq
 
-  real saxk, Etop, bemx, FSG, zi, su(8)
+  real saxk, bemx, FSG, zi, su(8)
   integer nels(2)
-  common / NML / saxk, Etop, bemx, FSG, zi, su, nels
+  common / NML / saxk, bemx, FSG, zi, su, nels
 
   real Emin, Efin, Emax, gam, pkE
   common / ENER / Emin, Efin, Emax, gam, pkE
@@ -288,7 +288,6 @@ subroutine PREP
 
   call EVANS
 
-  Efin = Emax
   saxk = 153540. * zi**2 * rho / ( betasq*AW )
   ! Saxon Eq ( 3a ) for k
   Emk  = saxk * Emax
@@ -314,7 +313,7 @@ subroutine EVANS
   common / ENER / Emin, Efin, Emax, gam, pkE
 
   integer jkm
-  real xxx, w, pmom, telm, emx
+  real xxx, w, pmom, emx, elm
 
   ! Evans, p 891, Uehling Eq ( 4a ).  Date : 15 June 1984
 
@@ -362,28 +361,29 @@ subroutine EVANS
 34 pmom = ptM * bg
 35 betasq = bg**2 / ( 1 + bg**2 )
   ! beta = bg / W
-  gam  = W
+  gam = W
   ! ptE  = ptM * W
 
   ! Maximum energy transfer   Emax  ( MeV )
   ! Uehling, also Sternheimer & Peierls Eq.( 53 )
 
-  telm = 2 * 0.511004
-  Emax = ptM * ( W**2 - 1.0 ) / ( ptM/telm + telm/ptM + W )
+  elm = 0.511 ! [MeV]
+  Emax = ptM * ( W**2 - 1.0 ) / ( 0.5*ptM/elmm + 0.5*elm/ptM + W ) ! bug fixed
   ! cannot distinguish i/o electrons
   if( npm .eq. 4 ) Emax = 0.5*pkE
 
   print*, 'particle type = ', npm, '   Emax = ', Emax, ' MeV'
-  Emx  = telm * bg**2
 
   write( 3, 333 ) bg, pmom, pkE
 333 format( /, 3x, 'beta*gamma=', f11.4, 3x, 'momentum=', f13.4, ' MeV/c', &
        3x, 'E kinetic of incident particle=', f15.2, ' MeV' )
-  write( 3, 334 ) betasq, gam, Emax, Emx
+  write( 3, 334 ) betasq, gam, Emax
 334 format( 3x, 'beta**2=', f9.6, 3x, 'gamma=', f12.5, 3x, 'Emax=', &
-       2e12.4, ' MeV'/ )
+         e12.4, ' MeV'/ )
 
   Emax = 1e6 * Emax! [eV]
+
+  Efin = Emax
 
 END subroutine EVANS
 
@@ -408,12 +408,12 @@ subroutine PREPE
   real Emin, Efin, Emax, gam, pkE
   common / ENER / Emin, Efin, Emax, gam, pkE
 
-  real saxk, Etop, bemx, FSG, zi, su(8)
+  real saxk, bemx, FSG, zi, su(8)
   integer nels(2)
-  common / NML / saxk, Etop, bemx, FSG, zi, su, nels
+  common / NML / saxk, bemx, FSG, zi, su, nels
 
   integer ken, l
-  real exs
+  real exs, Etop
 
   ! n2 = number of bins for each factor of 2 in energy
 
@@ -474,9 +474,9 @@ subroutine SPECT
   real Emin, Efin, Emax, gam, pkE
   common / ENER / Emin, Efin, Emax, gam, pkE
 
-  real saxk, Etop, bemx, FSG, zi, su(8)
+  real saxk, bemx, FSG, zi, su(8)
   integer nels(2)
-  common / NML / saxk, Etop, bemx, FSG, zi, su, nels
+  common / NML / saxk, bemx, FSG, zi, su, nels
 
   integer N2, N2P, MIE, MIF, MIH, LEF, LEH, nume, lemx
   real d1
@@ -642,32 +642,28 @@ subroutine SPTS
   common / SPTT / sig, stp, tsig, rM2, rim
 
   real sgm, stpw, secm, eps, bbb, fft, he2, rm0, sbb
-  integer jpr, ja, j, nlast
+  integer j, nlast
 
   !     write( 3, 333 )
   !333  format( /4X, 'SPTS, F.333:', /15X, 'E', 7x, 'sig*E**2', 6x, 'sig',
   !     1       10X, 'M 0', 11X, 'M 1', 11X, 'M 2', 10X, '<E>', / )
-  SGM  = 0
-  Stpw = 0
-  SECM = 0
-  jpr = 20
-  ja  = 20
 
-  do j=1, nume
+  do j = 1, nume
+
      if( E( j ) .gt. Emax ) go to 77
-     nlast= j
+
+     nlast = j
+
      he2  = sig( 5, j ) * dec
      H( j ) = he2 / E( j )**2
+
      SGM  = SGM + H( j )*dE( j )
      STPW = STPW + H( j ) * E( j ) * dE( j )
      SECM = SECM + he2 * dE( j )
      eps  = STPW / SGM
-     !     if( j .lt. 5 ) go to 11
-     !     if( j .eq. nume ) go to 11
-     !     if( jpr .ne. j ) go to 75
-     !     jpr = jpr + ja
-     !11   write( 3, 654 ) j, E( j ), he2, H( j ), SGM, STPW, SECM, eps
-     !     654            format( 1x, i6, f12.2, 1p7e13.5 )
+     write( 3, 654 ) j, E( j ), he2, H( j ), SGM, STPW, SECM, eps
+654  format( 1x, i6, f12.2, 1p7e13.5 )
+
   enddo
 
 77 write( 3, 610 )  nlast, SGM, STPW, SECM
@@ -675,12 +671,13 @@ subroutine SPTS
        3X, 'dE/dx=', E15.5, ', M2=', E15.5/2x, 'see FSR-99 and CCS-9' / )
   write( 3, * ) ' final E=', Efin, ' Emax=', Emax, ' he2=', he2
 
-  !ee   FSR-99
-  sbb = 720.
-  bbb = 1. - sbb*betasq / Emax
-  fft = 14. * dec / 1e6
+  ! FSR-99
+
+  sbb = 720.0
+  bbb = 1.0 - sbb*betasq / Emax
+  fft = 14.0 * dec / 1e6
   write( 3, * ) ' sbb=', sbb, ' eV,   bbb=', bbb, '  fft=', fft
-  rm0 = bbb * ( ( 1/Efin - 1/Emax ) + 2 * ( 1/Efin**2 - 1/Emax**2 ) ) &
+  rm0 = bbb * ( 1/Efin - 1/Emax + 2/Efin**2 - 2/Emax**2 ) &
        - betasq * alog( Emax/Efin ) / Emax
   write( 3, * ) ' residual M0=', rm0, rm0*fft, '/cm'
   write( 3, * ) '  If residual M0 is large, look for error'
@@ -711,13 +708,12 @@ subroutine HPART( bbb, fft, sbb, stpw, secm )
 
   real te, rst, rm2p, secmv, del2
 
-  if( npm .eq. 4 ) then ! e
-     !ee   FSR-143 and Uehling Eq 9
+  if( npm .eq. 4 ) then ! e, FSR-143 and Uehling Eq 9
      TE = pkE * 1e6
-     print*, ' ele', efin, emax, TE, gam
-     rst = alog( Emax/Efin ) + alog( Emax ) - alog( TE-Efin ) - 1.0 / ( 1.0 - Efin/TE ) &
-          + 2 + ( ( gam-1 ) / gam )**2 * ( 1.0/8.0 - 0.5 * ( Efin/TE )**2 ) &
-          + ( ( 2*gam - 1.0 ) / gam**2 ) * ( alog( Emax ) - alog( TE-Efin ) )
+     print *, ' ele', efin, emax, TE, gam
+     rst = alog( Emax/Efin ) + alog( Emax ) - alog( TE-Efin ) - 1.0 / ( 1.0 - Efin/TE ) + 2 + &
+          ( ( gam-1 ) / gam )**2 * ( 1.0/8.0 - 0.5 * ( Efin/TE )**2 ) + &
+          ( 2*gam - 1.0 ) / gam**2 * ( alog( Emax ) - alog( TE-Efin ) )
   else
      rst = bbb * alog( Emax/Efin ) + &
           sbb * ( 1.0/Efin - 1.0/Emax ) - betasq * ( 1.0 - Efin/Emax )
@@ -740,6 +736,7 @@ END subroutine HPART
 ! Hans Bichsel, 1984
 ! Convolution subroutines
 
+!-------------------------------------------------------------------------------
 subroutine CONV
 
   implicit none
@@ -758,9 +755,9 @@ subroutine CONV
   real d1
   common / IND /  N2, N2P, MIE, MIF, MIH, LEF, LEH, D1, nume, lemx
 
-  real saxk, Etop, bemx, FSG, zi, su(8)
+  real saxk, bemx, FSG, zi, su(8)
   integer nels(2)
-  common / NML / saxk, Etop, bemx, FSG, zi, su, nels
+  common / NML / saxk, bemx, FSG, zi, su, nels
 
   real cma, cmb, cmd, d2, d3, d4, tdedx, tDD(2,4), xkmn(200)
   common / MEAN / CMA, CMB, CMD, D2, D3, D4, tdedx, tDD, xkmn
